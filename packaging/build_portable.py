@@ -32,7 +32,7 @@ def copy_packages() -> None:
     target.mkdir(parents=True, exist_ok=True)
     shutil.copytree(
         VENV_SITE, target,
-        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo"),
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo", "machine-audit.md", "8ch_ml_prototype.md"),
         dirs_exist_ok=True,
     )
 
@@ -55,7 +55,7 @@ def copy_project() -> None:
         if item.is_dir():
             shutil.copytree(
                 item, dest,
-                ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo"),
+                ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo", "machine-audit.md", "8ch_ml_prototype.md"),
             )
         else:
             shutil.copy2(item, dest)
