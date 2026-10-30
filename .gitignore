@@ -1,0 +1,44 @@
+# local runtime
+.venv/
+.tmp*/
+.pip-cache/
+.uvcache/
+.tools/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+tray_settings.json
+lan_url.txt
+
+# generated user data
+configs/
+games/
+training_data/
+runs/
+data/
+demo_data/
+demo_out/
+mic_test.wav
+
+# browser / UI test profiles
+.ui_profile*/
+.edge_profile*/
+.uitest/
+ui.png
+
+# build artifacts and release assets
+build/
+build*/
+BinauralAssist-portable.zip
+BinauralAssist-portable.zip.sha256
+Binaural Assist.exe
+Binaural Assist.lnk
+
+# unrelated local data
+goh/
+
+docs/machine-audit.md
+docs/8ch_ml_prototype.md
+packaging/launcher.cs
+

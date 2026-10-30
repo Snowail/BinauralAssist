@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Binaural Assist · HRTF 音频增强</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="bg-orbs" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+    <span class="grid"></span>
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M3 17h3l2-8 4 16 4-22 4 18 3-10 2 6h4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Binaural Assist</h1>
+          <p>HRTF 双声道 · 脚步增强 / 枪声平滑</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="status-pill" id="statusPill">
+          <span class="status-dot"></span>
+          <span id="statusText">未运行</span>
+        </div>
+        <button class="btn ghost" id="bypassBtn" title="A/B 直通对比">
+          <span class="dot-mini"></span> 直通 A/B
+        </button>
+        <button class="btn ghost danger" id="shutdownBtn" title="停止音频并完全关闭后台服务">
+          <span class="power-icon">⏻</span> 退出
+        </button>
+        <button class="btn primary" id="startBtn">
+          <span class="play-icon">▶</span>
+          <span id="startLabel">启动音频</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <section class="panel route-panel">
+          <div class="panel-head">
+            <h2>音频路由</h2>
+            <button class="icon-btn" id="refreshDevices" title="刷新设备列表">↻</button>
+          </div>
+
+          <label class="field">
+            <span class="field-label">输入设备 <small>Realtek Line-In / 2ch</small></span>
+            <select id="inputSelect"></select>
+          </label>
+          <label class="field">
+            <span class="field-label">输出设备 <small>USB DAC · DAWN PRO2</small></span>
+            <select id="outputSelect"></select>
+          </label>
+
+          <label class="field">
+            <span class="field-label">缓冲 block</span>
+            <select id="blockSelect">
+              <option value="64">64 · 最低延迟</option>
+              <option value="128" selected>128 · 推荐</option>
+              <option value="256">256 · 更稳</option>
+            </select>
+          </label>
+
+          <p class="route-hint">只显示可用的 WASAPI 端点；输入/输出不足 2 声道的设备会被隐藏。</p>
+
+          <div class="latency-card">
+            <div class="latency-top">
+              <span>端到端估计</span>
+              <strong id="latencyValue">-- ms</strong>
+            </div>
+            <div class="latency-track"><i id="latencyBar"></i></div>
+            <p id="latencyHint">启动后显示 WASAPI 缓冲延迟</p>
+          </div>
+
+          <div class="restart-banner hidden" id="restartBanner">
+            设备 / 缓冲已修改，重启音频后生效。
+          </div>
+        </section>
+
+        <section class="panel monitor-panel">
+          <div class="panel-head">
+            <h2>实时监测</h2>
+            <span class="tag" id="xrunTag">xrun 0</span>
+          </div>
+
+          <div class="meter-row">
+            <span class="meter-label">L</span>
+            <div class="meter"><i id="meterL"></i></div>
+            <b id="dbL">-∞</b>
+          </div>
+          <div class="meter-row">
+            <span class="meter-label">R</span>
+            <div class="meter"><i id="meterR"></i></div>
+            <b id="dbR">-∞</b>
+          </div>
+
+          <div class="gauge-grid">
+            <div class="gauge cyan">
+              <div class="ring" id="footRing"><b id="footValue">0%</b></div>
+              <span>脚步活动</span>
+            </div>
+            <div class="gauge amber">
+              <div class="ring" id="gunRing"><b id="gunValue">0%</b></div>
+              <span>枪声活动</span>
+            </div>
+          </div>
+
+          <div class="corr-row">
+            <div class="corr-head"><span>L/R 相关</span><b id="corrValue">+0.00</b></div>
+            <div class="corr-track"><i id="corrBar"></i><span class="corr-center"></span></div>
+            <p id="corrHint">接近 +1 时请检查输入是否被单声道化</p>
+          </div>
+        </section>
+
+        <section class="panel preset-panel">
+          <div class="panel-head"><h2>快速预设</h2><span class="tag">Presets</span></div>
+          <div class="chips" id="presetChips"></div>
+          <div class="preset-desc" id="presetDesc">当前参数会自动保存为“当前配置”。</div>
+          <div class="preset-actions">
+            <button class="btn tiny ghost" id="resetBtn">恢复默认</button>
+            <button class="btn tiny ghost" id="savePresetBtn">保存为预设</button>
+            <button class="btn tiny ghost" id="importPresetBtn">导入配置</button>
+            <button class="btn tiny ghost" id="exportBtn">导出当前配置</button>
+            <input type="file" id="importPresetFile" accept="application/json,.json" hidden>
+          </div>
+        </section>
+      </aside>
+
+      <section class="content">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="mixer" role="tab">调音台</button>
+          <button class="tab" data-tab="training" role="tab">训练数据 <span class="tab-count" id="trainCount">0</span></button>
+          <button class="tab" data-tab="games" role="tab">游戏识别 <span class="tab-count" id="gameCount">0</span></button>
+        </div>
+
+        <div class="tab-pane active" id="mixerPane">
+        <section class="hero panel">
+          <div class="hero-copy">
+            <span class="eyebrow">REAL-TIME BINAURAL PROCESSING</span>
+            <h2>让脚步更远，<br>让枪声不再刺耳。</h2>
+            <p>物理回环 · 零虚拟声卡 · 立体声联动 DSP，保留 HRTF 的方向线索。</p>
+          </div>
+          <div class="hero-stats">
+            <div><span>采样率</span><b>48 kHz</b></div>
+            <div><span>声道</span><b>2 ch</b></div>
+            <div><span>DSP</span><b>~0.3 ms</b></div>
+            <div><span>延迟</span><b id="heroLatency">--</b></div>
+          </div>
+        </section>
+
+        <div class="cards" id="paramGroups"></div>
+
+        <section class="panel notes">
+          <div class="panel-head">
+            <h2>使用说明与理论</h2>
+            <span class="tag">Detailed guide</span>
+          </div>
+          <div class="notes-grid">
+            <details class="note" open>
+              <summary>为什么所有处理都必须 stereo-linked？</summary>
+              <p>HRTF 的左右/前后线索全部藏在 L/R 的差异里：ITD（双耳时间差）、ILD（双耳电平差）和耳廓频谱。任何逐声道独立的压缩、限幅或 AGC 都会改变这些差异，直接把声像压扁。本项目所有动态增益都由 <code>max(|L|, |R|)</code> 计算，再同时乘到两个声道。</p>
+            </details>
+            <details class="note">
+              <summary>脚步：向上压缩与侧向增强</summary>
+              <p>脚步是低电平短瞬态。普通“调大音量”会同时放大枪声和环境噪声；这里只对低于 <code>upward_threshold_db</code> 的瞬态按比例抬升，并用 <code>gate_db</code> 挡住底噪。侧信号 <code>L−R</code> 的增益只改变 ILD，不改变 mid，也不引入时延，所以 ITD 保持不变。</p>
+            </details>
+            <details class="note">
+              <summary>枪声：动态高频与 lookahead 限幅</summary>
+              <p>枪声刺耳感集中在 2.5–9 kHz。检测到高频瞬态后，在 1.5 ms 内衰减该频带，180 ms 释放；同时用立体声联动限幅器压住峰值。限幅器预读 <code>lookahead</code> 越大越能压住起音，但端到端延迟会线性增加。</p>
+            </details>
+            <details class="note">
+              <summary>接线与电平</summary>
+              <p>优先使用主板蓝色 Line-In，而不是粉色 Mic-In：后者常见单声道，并且会启用降噪/AGC/波束成形，抹掉 L/R 差异。关闭 Windows 和 Realtek 的所有麦克风增强；最响枪声的输入峰值调到约 −12 ~ −6 dBFS。若 <code>L/R corr</code> 持续接近 +1，说明输入被单声道复制，方向增强无效。</p>
+            </details>
+
+          </div>
+        </section>
+        </div><!-- /mixerPane -->
+
+        <div class="tab-pane hidden" id="trainingPane">
+          <section class="panel training-panel">
+            <div class="panel-head">
+              <h2>训练数据采集</h2>
+              <span class="tag" id="trainStats">0 clips</span>
+            </div>
+            <p class="training-intro">
+              先点右上角“启动音频”，再在游戏里制造枪声/脚步。点击下方按钮会保存最近 N 秒的原始
+              Line-In 音频（48 kHz / 2ch），然后手动选择正确类别。素材保存在
+              <code>training_data/clips/</code>，导出后可直接用于 <code>fps_aed</code> 训练。
+            </p>
+
+            <div class="capture-controls">
+              <label class="field compact">
+                <span class="field-label">截取长度</span>
+                <select id="captureSeconds">
+                  <option value="0.5">0.5 s</option>
+                  <option value="1" selected>1.0 s</option>
+                  <option value="1.5">1.5 s</option>
+                  <option value="2">2.0 s</option>
+                </select>
+              </label>
+              <button class="btn primary" id="captureBtn">截取最近 1.0 s</button>
+              <button class="btn ghost" id="exportTrainBtn">导出 manifest.csv</button>
+            </div>
+
+            <div class="quick-labels">
+              <span>截取并标记：</span>
+              <button class="chip quick-label" data-label="gunshot">枪声</button>
+              <button class="chip quick-label" data-label="footstep">脚步</button>
+              <button class="chip quick-label" data-label="other">其他</button>
+              <button class="chip quick-label" data-label="background">背景</button>
+            </div>
+
+            <p class="training-hint" id="trainingHint">
+              截取后若不确定，先标记为“待标注”，再在下面的列表里试听和修正。
+            </p>
+
+            <div class="clip-list" id="clipList">
+              <div class="empty-clips">还没有训练素材。启动音频后截取第一段。</div>
+            </div>
+
+            <div class="train-model">
+              <div class="train-model-head">
+                <div>
+                  <h3>2ch 事件模型</h3>
+                  <p>默认 CPU 训练；AMD GPU 请选 CPU。CUDA 仅适用于 NVIDIA 显卡。</p>
+                </div>
+                <span class="tag" id="modelStatus">未加载</span>
+              </div>
+
+              <div class="train-controls">
+                <label class="field compact">
+                  <span class="field-label">训练设备</span>
+                  <select id="trainDevice">
+                    <option value="cpu" selected>CPU（推荐 / AMD）</option>
+                    <option value="cuda">CUDA（NVIDIA）</option>
+                    <option value="auto">自动选择</option>
+                  </select>
+                </label>
+                <label class="field compact">
+                  <span class="field-label">epochs</span>
+                  <input class="num-input" id="trainEpochs" type="number" value="20" min="1" max="200">
+                </label>
+                <label class="field compact">
+                  <span class="field-label">batch</span>
+                  <input class="num-input" id="trainBatch" type="number" value="16" min="1" max="64">
+                </label>
+                <label class="check-line">
+                  <input type="checkbox" id="autoReplace" checked>
+                  <span>训练完成后自动替换实时检测器</span>
+                </label>
+                <button class="btn primary" id="trainStartBtn">开始训练</button>
+                <button class="btn ghost" id="trainStopBtn" disabled>停止</button>
+              </div>
+
+              <div class="classifier-line">
+                <label class="switch">
+                  <input type="checkbox" id="classifierToggle">
+                  <span class="switch-track"><span class="switch-thumb"></span></span>
+                </label>
+                <div>
+                  <b>实时使用模型检测器</b>
+                  <p id="classifierInfo">加载训练好的 best.pt 后，用 2ch 模型替换启发式事件检测；DSP 不变。</p>
+                </div>
+              </div>
+
+              <pre class="train-log" id="trainLog">训练日志会显示在这里。</pre>
+            </div>
+          </section>
+        </div><!-- /trainingPane -->
+
+        <div class="tab-pane hidden" id="gamesPane">
+          <section class="panel games-panel">
+            <div class="panel-head">
+              <h2>游戏进程识别</h2>
+              <span class="tag" id="gameAutoStatus">自动启动：开启</span>
+            </div>
+            <p class="training-intro">
+              添加游戏的可执行程序；检测到进程时自动开始音频处理，游戏全部退出后自动停止。
+              首次使用需要先在“调音台”手动启动一次，让程序记住输入/输出设备。
+              白名单保存在 <code>games/games.json</code>，重启不丢失。
+            </p>
+
+            <div class="game-add">
+              <button class="btn primary" id="gameBrowseBtn">浏览 EXE 添加</button>
+              <input class="game-path-input" id="gamePathInput" placeholder="或粘贴 exe 完整路径">
+              <button class="btn ghost" id="gameAddPathBtn">添加路径</button>
+              <span class="game-monitor" id="gameMonitorStatus">正在检测…</span>
+            </div>
+
+            <div class="game-list" id="gameList">
+              <div class="empty-clips">还没有游戏。点击“浏览 EXE 添加”。</div>
+            </div>
+
+            <p class="game-hint" id="gameHint">
+              托盘菜单里的“游戏启动自动开启音频处理”默认勾选；取消后完全手动控制，不再识别游戏进程。
+            </p>
+          </section>
+        </div><!-- /gamesPane -->
+      </section>
+    </main>
+
+    <footer>
+      <span>Binaural Assist v0.1 · 本地运行，音频不上传</span>
+      <span>物理回环 · 不注入游戏进程</span>
+    </footer>
+  </div>
+
+  <div class="modal-backdrop hidden" id="shutdownModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-badge">⏻</div>
+      <h3>退出 Binaural Assist？</h3>
+      <p>将停止音频处理并<b>完全关闭后台服务</b>。手机端会立即断开，之后需要重新双击快捷方式启动。</p>
+      <div class="modal-actions">
+        <button class="btn ghost" id="shutdownCancel">取消</button>
+        <button class="btn danger-solid" id="shutdownConfirm">退出程序</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="shutdown-screen hidden" id="shutdownScreen">
+    <div class="shutdown-card">
+      <div class="shutdown-mark">⏻</div>
+      <h2>服务已关闭</h2>
+      <p>音频处理和后台服务已经停止，可以关闭这个页面了。</p>
+      <p class="shutdown-hint">下次使用：双击 <code>Binaural Assist.lnk</code> 或运行 <code>启动 Binaural Assist.bat</code>。</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

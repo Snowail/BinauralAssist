@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="title desc">
+  <title id="title">双机物理接线示意</title>
+  <desc id="desc">游戏电脑只通过 3.5mm 线连接到另一台运行 Binaural Assist 的处理电脑</desc>
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f172a"/>
+    </marker>
+    <marker id="arrow2c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0891b2"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="430" fill="#f8fafc"/>
+  <text x="40" y="42" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="#0f172a">双机部署：游戏电脑完全无软件</text>
+  <text x="40" y="68" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="14" fill="#475569">游戏电脑只输出模拟音频；另一台电脑运行 Binaural Assist 完成采集、处理和耳机输出</text>
+
+  <rect x="40" y="110" width="230" height="125" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="155" y="150" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#0f172a">游戏电脑</text>
+  <text x="155" y="176" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="13" fill="#475569">三角洲 / 其他游戏</text>
+  <text x="155" y="199" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="12" fill="#16a34a" font-weight="600">不装本程序 · 不装驱动</text>
+  <text x="155" y="219" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="11" fill="#64748b">不读取进程 · 不联网</text>
+
+  <rect x="310" y="130" width="120" height="70" rx="10" fill="#ecfdf5" stroke="#34d399" stroke-width="1.5"/>
+  <text x="370" y="158" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#065f46">Line-Out</text>
+  <text x="370" y="178" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="11" fill="#047857">绿色 / 3.5 mm</text>
+
+  <path d="M 270 165 L 310 165" fill="none" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow2)"/>
+  <path d="M 430 165 L 500 165" fill="none" stroke="#0f172a" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow2)"/>
+  <text x="465" y="154" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="11" fill="#dc2626" font-weight="600">3.5 mm 公对公</text>
+  <text x="465" y="188" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="10" fill="#64748b">模拟音频线</text>
+
+  <rect x="500" y="70" width="660" height="235" rx="14" fill="#ffffff" stroke="#22d3ee" stroke-width="2"/>
+  <text x="830" y="102" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="17" font-weight="700" fill="#155e75">处理电脑 / 另一台 PC（运行 Binaural Assist）</text>
+
+  <rect x="525" y="125" width="180" height="80" rx="10" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.5"/>
+  <text x="615" y="151" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#1e3a8a">Line-In 蓝色</text>
+  <text x="615" y="173" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="11" fill="#1d4ed8">立体声线路输入</text>
+  <text x="615" y="192" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="10" fill="#1d4ed8">48 kHz / 24-bit</text>
+
+  <rect x="745" y="125" width="190" height="80" rx="10" fill="#ecfeff" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="840" y="151" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#155e75">Binaural Assist</text>
+  <text x="840" y="174" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="11" fill="#0e7490">WASAPI 共享</text>
+  <text x="840" y="193" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="11" fill="#0e7490">脚步 / 枪声 DSP</text>
+
+  <rect x="975" y="125" width="160" height="80" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="1055" y="151" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#0f172a">USB DAC</text>
+  <text x="1055" y="174" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="11" fill="#475569">处理后输出</text>
+  <text x="1055" y="193" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="10" fill="#64748b">48 kHz / 24-bit</text>
+
+  <path d="M 705 165 L 745 165" fill="none" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow2c)"/>
+  <path d="M 935 165 L 975 165" fill="none" stroke="#0891b2" stroke-width="2" marker-end="url(#arrow2c)"/>
+  <text x="840" y="235" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="11" fill="#64748b">输入和处理都在处理电脑上完成</text>
+  <path d="M 1055 205 L 1055 260" fill="none" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow2)"/>
+  <text x="1074" y="238" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a">耳机</text>
+
+  <rect x="40" y="330" width="1115" height="65" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="58" y="355" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="13" fill="#1e3a8a" font-weight="600">双机关键点：游戏电脑只需要一根 3.5 mm 模拟线，Binaural Assist 和所有声卡都在处理电脑上。</text>
+  <text x="58" y="377" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif" font-size="12" fill="#1e3a8a">软件层面无注入、无驱动、无进程读取；在线对战/赛事规则仍请自行确认，音频增强可能被规则限制。</text>
+</svg>
